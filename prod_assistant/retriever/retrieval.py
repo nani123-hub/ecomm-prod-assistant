@@ -49,7 +49,7 @@ class Retriever:
                 token=self.db_application_token,
                 namespace=self.db_keyspace,
                 )
-        if not self.retriever_instance:
+        if not self.retriever:
             top_k = self.config["retriever"]["top_k"] if "retriever" in self.config else 3
             mmr_retriever=self.vstore.as_retriever(
                 search_type="mmr",
@@ -61,11 +61,11 @@ class Retriever:
             print("Retriever loaded successfully.")
             llm = self.model_loader.load_llm()
             compressor=LLMChainFilter.from_llm(llm)
-            self.retriever_instance = ContextualCompressionRetriever(
+            self.retriever = ContextualCompressionRetriever(
                 base_compressor=compressor, 
                 base_retriever=mmr_retriever
             )
-        return self.retriever_instance
+        return self.retriever
     
     def call_retriever(self,query):
         # Call the retriever with a query
@@ -75,7 +75,7 @@ class Retriever:
     
 if __name__ == "__main__":
     retriever_obj = Retriever()
-    user_query = "can you suggest good budget laptops?"
+    user_query = "tell me about iphone 16 pro?"
     results = retriever_obj.call_retriever(user_query)
     for idx, doc in enumerate(results,1):
         print(f"Result {idx}: {doc.page_content}\nMetadata: {doc.metadata}\n")
